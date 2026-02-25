@@ -6,9 +6,7 @@
 #define MAX_TOKENS 100
 #define MAX_LEN 100
 
-// Funcion de tokenizador
 void tokenizador1(char texto[]) {
-    // Medición de tiempo
     clock_t t_ini, t_fin;
     t_ini = clock();
 
@@ -21,22 +19,20 @@ void tokenizador1(char texto[]) {
 
     int len = strlen(texto);
 
-    // Recorrer el texto carácter por carácter
     for (int i = 0; i < len; i++) {
 
         if (texto[i] == ' ' || texto[i] == '.') {
-            if (j > 0) {  // Evitar tokens vacíos
-                token[j] = '\0';  // Terminar cadena
+            if (j > 0) {  
+                token[j] = '\0';  
                 strcpy(tokens[token_index], token);
                 token_index++;
-                j = 0;  // Reiniciar token
+                j = 0;  
             }
         } else {
             token[j++] = texto[i];
         }
     }
 
-    // Agregar último token si no termina en espacio o punto
     if (j > 0) {
         token[j] = '\0';
         strcpy(tokens[token_index], token);
