@@ -42,7 +42,7 @@ void tokenizador1(char texto[]) {
     t_fin = clock();
     double tiempo = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
 
-    printf("Tiempo de ejecución: %f segundos\n", tiempo);
+    printf("Tiempo de ejecucion: %f segundos\n", tiempo);
     printf("Tokens encontrados:\n");
 
     for (int i = 0; i < token_index; i++) {
@@ -52,7 +52,7 @@ void tokenizador1(char texto[]) {
 
 int main() {
 
-    char texto[] = "Los alumnos de PLN tienen poca imaginación. Por eso reprobarán";
+    char texto[] = "Los alumnos de PLN tienen poca imaginacion. Por eso reprobaran";
 
     tokenizador1(texto);
 
