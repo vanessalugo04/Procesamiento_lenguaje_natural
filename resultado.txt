@@ -1,0 +1,127 @@
+2.2. El problema del jugador 
+En esta sección consideraremos un ejemplo particular de una caminata aleatoria puesta en el 
+contexto de un juego de apuestas. 
+Planteamiento del problema 
+Suponga que un jugador 𝐴 apuesta sucesivamente una unidad monetaria a un jugador 𝐵. 
+Inicialmente, el jugador 𝐴 tiene 𝑘 unidades y 𝐵 tiene 𝑁−𝑘 unidades; es decir, el capital conjunto 
+entre los dos jugadores es de 𝑁 unidades monetarias. En cada apuesta, el jugador 𝐴 tiene 
+probabilidad de ganar 𝑝 y probabilidad de perder 𝑞= 1 −𝑝. Suponga además que no hay empates. 
+Sea 
+𝑋𝑛 
+la 
+fortuna 
+del 
+jugador 
+𝐴 
+al 
+tiempo 
+𝑛. 
+Entonces, 
+{𝑋𝑛: 𝑛= 0,1,2, …  } 
+es una caminata aleatoria que inicia en el estado 𝑘 y eventualmente puede terminar en el estado 0, 
+cuando el jugador 𝐴 ha perdido todo su capital, o bien puede terminar en el estado 𝑁, que 
+corresponde a la situación en donde el jugador 𝐴 ha ganado todo el capital. 
+Este proceso es entonces una caminata aleatoria sobre el conjunto {0,1,2, … , 𝑁}, 
+en donde los estados 0 y 𝑁 son absorbentes, pues una vez que la cadena llega a alguno de ellos, 
+jamás lo abandona. 
+Una de las preguntas que resolveremos para esta caminata es la siguiente: ¿Cuál es la probabilidad 
+de que eventualmente el jugador 𝐴 se arruine? Es decir, ¿cuál es la probabilidad de que la caminata 
+se absorba en el estado 0 y no en el estado 𝑁, u oscile entre estos dos estados? 
+Este problema se conoce como el problema de la ruina del jugador, y encontraremos a continuación 
+su solución. Como veremos, usando probabilidad condicional es posible transformar este problema 
+en resolver una ecuación en diferencias. 
+Solución al problema 
+Sea 𝜏 el primer momento en el que la caminata visita alguno de los dos estados absorbentes, es 
+decir, 𝜏= min {𝑛≥0: 𝑋𝑛= 0 o 𝑋𝑛= 𝑁}. Puede demostrarse que 𝜏es una variable aleatoria y que 
+es finita casi seguramente. La pregunta planteada se traduce en encontrar la probabilidad: 
+𝑢𝑘= 𝑃(𝑋𝜏= 0 ∣𝑋0 = 𝑘). 
+Por el teorema de la probabilidad total se obtiene la ecuación en diferencias: 
+𝑢𝑘= 𝑝 𝑢𝑘+1 + 𝑞 𝑢𝑘−1,
+(2.11) 
+válida para 𝑘= 1,2, … , 𝑁−1. La interpretación intuitiva de esta identidad es sencilla: a partir del 
+estado 𝑘 se busca la probabilidad de ruina analizando lo que sucede en la siguiente apuesta. Se 
+tienen dos casos: El jugador gana con probabilidad 𝑝 y se busca la probabilidad de ruina a partir 
+del estado 𝑘+ 1 o bien el jugador pierde con probabilidad 𝑞 y se busca la probabilidad de ruina a 
+partir del estado 𝑘−1. Las condiciones de frontera son 𝑢0 = 1, 𝑢𝑁= 0. Esta ecuación es una 
+ecuación en diferencias lineal, homogénea y de segundo orden. 
+
+Puede encontrarse su solución de la siguiente manera: multiplicando el lado izquierdo de (2.11) 
+por (𝑝+𝑞) y agrupando términos, se llega a la expresión equivalente: 
+𝑢𝑘+1 −𝑢𝑘= 𝑞
+𝑝(𝑢𝑘−𝑢𝑘−1).
+(2.12) 
+Resolviendo iterativamente, las primeras 𝑘−1ecuaciones se escriben como: 
+𝑢2 −𝑢1
+= 𝑞
+𝑝(𝑢1 −1),
+𝑢3 −𝑢2
+= (𝑞
+𝑝)
+2
+(𝑢1 −1),
+𝑢𝑘−𝑢𝑘−1
+= (𝑞
+𝑝)
+𝑘−1
+(𝑢1 −1).
+ 
+Aquí se ha usado la condición de frontera 𝑢0 = 1. 
+Definamos ahora: 
+𝑆𝑘= 1 + 𝑞
+𝑝+ ⋯+ (𝑞
+𝑝)
+𝑘
+. 
+Al sumar las 𝑘−1ecuaciones anteriores se obtiene: 
+𝑢𝑘−𝑢1 = (𝑆𝑘−1 −1)(𝑢1 −1), 
+o bien, 
+𝑢𝑘= 1 + 𝑆𝑘−1(𝑢1 −1).
+(2.13) 
+De manera análoga, sumando todas las ecuaciones de (2.12) se obtiene: 
+𝑢𝑁= 1 + 𝑆𝑁−1(𝑢1 −1). 
+Usando la condición de frontera 𝑢𝑁= 0, se llega a: 
+𝑢1 −1 = −
+1
+𝑆𝑁−1
+. 
+Sustituyendo en (2.13) y simplificando se obtiene la solución: 
+𝑢𝑘= 1 −𝑆𝑘−1
+𝑆𝑁−1
+. 
+Se distinguen los siguientes dos casos: 
+𝑆𝑘=
+{
+ 
+ 
+𝑘+ 1,
+si 𝑝= 1
+2 ,
+1 −(𝑞/𝑝)𝑘+1
+1 −(𝑞/𝑝)
+,
+si 𝑝≠1
+2 .
+ 
+Por lo tanto, 
+
+𝑢𝑘=
+{
+ 
+ 
+𝑁−𝑘
+𝑁
+,
+si 𝑝= 1
+2 ,
+(𝑞/𝑝)𝑘−(𝑞/𝑝)𝑁
+1 −(𝑞/𝑝)𝑁
+,
+si 𝑝≠1
+2 .
+(2.14) 
+En la Figura 2.5 se muestra la gráfica de la probabilidad 𝑢𝑘 como función del parámetro 𝑘, para 
+varios valores de 𝑝 y con 𝑁= 50. En el caso simétrico, la solución es la línea recta que une la 
+probabilidad 1 con la probabilidad 0. Naturalmente, la probabilidad de ruina decrece cuando el 
+capital inicial 𝑘 aumenta. 
+ 
+
