@@ -135,15 +135,15 @@ if st.button("Procesar documentos"):
 
         #generar pdfs
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp1:
-            generar_pdf_documentos(tmp1.name, {"Original Tokenizado": " ".join(tokens_original)})
+            generar_pdf_documentos(tmp1.name, {"Original Tokenizado": (tokens_original)})
             st.download_button("Descargar PDF Original Tokenizado", open(tmp1.name, "rb"), file_name="original_tokenizado.pdf")
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp2:
-            generar_pdf_documentos(tmp2.name, {"Plagio Tokenizado": " ".join(tokens_plagio)})
+            generar_pdf_documentos(tmp2.name, {"Plagio Tokenizado":(tokens_plagio)})
             st.download_button("Descargar PDF Plagio Tokenizado", open(tmp2.name, "rb"), file_name="plagio_tokenizado.pdf")
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp3:
-            generar_pdf_documentos(tmp3.name, {"No Plagio Tokenizado": " ".join(tokens_no_plagio)})
+            generar_pdf_documentos(tmp3.name, {"No Plagio Tokenizado": (tokens_no_plagio)})
             st.download_button("Descargar PDF No Plagio Tokenizado", open(tmp3.name, "rb"), file_name="no_plagio_tokenizado.pdf")
 
 st.markdown("---")
