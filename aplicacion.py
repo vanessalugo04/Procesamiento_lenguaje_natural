@@ -3,6 +3,7 @@ from pypdf import PdfReader
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 import tempfile
+from reglas_proyecto import verbs_rules, exceptions, reglas_morfologicas
 
 #funcion para leer el pdf 
 def leer_pdf(file):
@@ -70,6 +71,7 @@ def es_valido(caracter):
     return True
   else:
     return False
+
   
 def tokenizador(texto, stopwords, valido):
     token = ""
@@ -87,6 +89,51 @@ def tokenizador(texto, stopwords, valido):
                 token = ''
 
     return tokens[0:j]
+
+def longitud(palabra):
+    cantidad_caracteres = 0
+    for caracter in palabra:
+        cantidad_caracteres = cantidad_caracteres + 1
+    return cantidad_caracteres
+
+
+def termina_en(palabra, sufijo):
+    long_p = longitud(palabra)
+    long_s = longitud(sufijo)
+    if long_s > long_p:
+        return False
+    return palabra[long_p - long_s:] == sufijo
+
+def lematizador(tokens):
+    texto_lematizado = [None] * len(tokens)
+    j = 0 
+
+    for palabra in tokens:
+        palabra_lematizada = None
+                
+        if palabra in exceptions: 
+            palabra_lematizada = exceptions[palabra]
+                    
+        if palabra_lematizada is None:
+            for sufijo, terminacion in verbs_rules:
+                if (longitud(palabra) - longitud(sufijo) >= 2) and termina_en(palabra, sufijo):
+                    palabra_lematizada = palabra[:-longitud(sufijo)] + terminacion 
+                    break
+                        
+        if palabra_lematizada is None:
+            for sufijo, reemplazo in reglas_morfologicas:
+                min_raiz = 3 if sufijo in ('es', 's') else 2 
+                if longitud(palabra) - longitud(sufijo) >= min_raiz and termina_en(palabra, sufijo):
+                    palabra_lematizada = palabra[:-longitud(sufijo)] + reemplazo
+                    break
+
+        if palabra_lematizada is None: 
+            palabra_lematizada = palabra
+                
+        texto_lematizado[j] = palabra_lematizada
+        j = j + 1
+    
+    return texto_lematizado[:j]
 
 #generar pdfs
 def generar_pdf_documentos(nombre_pdf, documentos):
@@ -126,6 +173,10 @@ if st.button("Procesar documentos"):
         tokens_original = tokenizador(texto_original, stopwords, es_valido)
         tokens_plagio = tokenizador(texto_plagio, stopwords, es_valido)
         tokens_no_plagio = tokenizador(texto_no_plagio, stopwords, es_valido)
+        
+        lematizador_original = lematizador(tokens_original)
+        lematizador_plagio = lematizador(tokens_plagio)
+        lematizador_no_plagio = lematizador(tokens_no_plagio)
 
         st.success("Procesamiento completo")
 
@@ -135,13 +186,19 @@ if st.button("Procesar documentos"):
 
         #generar pdfs
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp1:
-            generar_pdf_documentos(tmp1.name, {"Original Tokenizado": (tokens_original)})
-            st.download_button("Descargar PDF Original Tokenizado", open(tmp1.name, "rb"), file_name="original_tokenizado.pdf")
+            generar_pdf_documentos(tmp1.name, {"Original Preprocesado": (lematizador_original)})
+            st.download_button("Descargar PDF Original Preprocesado", open(tmp1.name, "rb"), file_name="original_preprocesado.pdf")
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp2:
-            generar_pdf_documentos(tmp2.name, {"Plagio Tokenizado":(tokens_plagio)})
-            st.download_button("Descargar PDF Plagio Tokenizado", open(tmp2.name, "rb"), file_name="plagio_tokenizado.pdf")
+            generar_pdf_documentos(tmp2.name, {"Plagio Preprocesado":(lematizador_plagio)})
+            st.download_button("Descargar PDF Plagio Preprocesado", open(tmp2.name, "rb"), file_name="plagio_preprocesado.pdf")
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp3:
+
             generar_pdf_documentos(tmp3.name, {"No Plagio Tokenizado": (tokens_no_plagio)})
             st.download_button("Descargar PDF No Plagio Tokenizado", open(tmp3.name, "rb"), file_name="no_plagio_tokenizado.pdf")
+            generar_pdf_documentos(tmp3.name, {"No Plagio Preprocesado": (lematizador_no_plagio)})
+            st.download_button("Descargar PDF No Plagio Preprocesado", open(tmp3.name, "rb"), file_name="no_plagio_preprocesado.pdf")
+
+st.markdown("---")
+st.caption("Proyecto PLN")
