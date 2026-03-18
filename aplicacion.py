@@ -145,6 +145,3 @@ if st.button("Procesar documentos"):
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp3:
             generar_pdf_documentos(tmp3.name, {"No Plagio Tokenizado": (tokens_no_plagio)})
             st.download_button("Descargar PDF No Plagio Tokenizado", open(tmp3.name, "rb"), file_name="no_plagio_tokenizado.pdf")
-
-st.markdown("---")
-st.caption("Proyecto de análisis de texto")
