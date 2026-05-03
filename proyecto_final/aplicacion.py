@@ -4,6 +4,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 import tempfile
 from reglas_proyecto import verbs_rules, exceptions, reglas_morfologicas
+from corpus_manager import (inicializar_corpus_admin, agregar_documento_usuario,obtener_estadisticas)
 
 #funcion para leer el pdf 
 def leer_pdf(file):
@@ -158,6 +159,47 @@ st.write("Sube tres archivos PDF para procesarlos y tokenizarlos")
 archivo_original = st.file_uploader("Sube archivo ORIGINAL", type="pdf")
 archivo_plagio = st.file_uploader("Sube archivo PLAGIO", type="pdf")
 archivo_no_plagio = st.file_uploader("Sube archivo NO PLAGIO", type="pdf")
+
+nuevos = inicializar_corpus_admin()   # carga PDFs de /corpus al arrancar
+if nuevos > 0:
+    st.toast(f"✅ {nuevos} documento(s) admin cargados al corpus")
+
+st.markdown("---")
+st.header("📚 Corpus de Referencia")
+
+# ── Estadísticas del corpus ──────────────────────────────────────────────────
+stats = obtener_estadisticas()
+col1, col2, col3 = st.columns(3)
+col1.metric("Total documentos", stats["total_documentos"])
+col2.metric("Subidos por admin", stats["documentos_admin"])
+col3.metric("Subidos por usuarios", stats["documentos_usuario"])
+
+with st.expander("Ver documentos en el corpus"):
+    if stats["nombres"]:
+        for nombre in stats["nombres"]:
+            st.write(f"• {nombre}")
+    else:
+        st.info("El corpus está vacío todavía.")
+
+# ── Subida de documentos por el usuario ─────────────────────────────────────
+st.subheader("➕ Agregar documento al corpus")
+archivos_usuario = st.file_uploader(
+    "Sube uno o más PDFs para enriquecer el corpus",
+    type="pdf",
+    accept_multiple_files=True,
+    key="corpus_uploader"
+)
+
+if st.button("Agregar al corpus"):
+    if not archivos_usuario:
+        st.warning("Selecciona al menos un archivo.")
+    else:
+        for archivo in archivos_usuario:
+            info = agregar_documento_usuario(archivo.name, archivo)
+            st.success(
+                f"✅ '{info['nombre']}' agregado — {info['num_tokens']} tokens"
+            )
+        st.rerun()   # refresca las métricas arriba
 
 #botones
 if st.button("Procesar documentos"):
