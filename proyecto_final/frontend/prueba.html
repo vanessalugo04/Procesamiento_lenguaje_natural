@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procesador NLP</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        button {
+
+            margin-top: 15px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        #resultado {
+
+            margin-top: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+
+            white-space: pre-wrap;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <h1>Procesador de Textos NLP</h1>
+
+    <input type="file" id="archivoPdf" accept=".pdf,.txt">
+
+    <br>
+
+    <button onclick="procesarDocumento()">
+        Preprocesar Documento
+    </button>
+
+    <div id="resultado">
+        Esperando documento...
+    </div>
+
+    <script>
+
+        // ==========================================
+        // STOPWORDS BÁSICAS
+        // ==========================================
+
+        const STOPWORDS = [
+
+            "de", "la", "que", "el", "en", "y",
+            "a", "los", "del", "se", "las",
+            "por", "un", "para", "con", "no",
+            "una", "su", "al", "lo"
+        ];
+
+        // ==========================================
+        // MINÚSCULAS
+        // ==========================================
+
+        function toMinusculas(texto) {
+
+            return texto.toLowerCase();
+        }
+
+        // ==========================================
+        // TOKENIZADOR
+        // ==========================================
+
+        function tokenizador(texto) {
+
+            const tokens = texto.match(/[a-záéíóúñ]+/gi) || [];
+
+            return tokens.filter(
+                token => !STOPWORDS.includes(token)
+            );
+        }
+
+        // ==========================================
+        // PREPROCESAMIENTO
+        // ==========================================
+
+        function preprocessTexto(texto) {
+
+            const textoMin = toMinusculas(texto);
+
+            const tokens = tokenizador(textoMin);
+
+            return tokens;
+        }
+
+        // ==========================================
+        // PROCESAR DOCUMENTO
+        // ==========================================
+
+        async function procesarDocumento() {
+
+            const input =
+                document.getElementById("archivoPdf");
+
+            const resultado =
+                document.getElementById("resultado");
+
+            // ======================================
+            // VALIDAR ARCHIVO
+            // ======================================
+
+            if (input.files.length === 0) {
+
+                resultado.innerText =
+                    "Selecciona un archivo.";
+
+                return;
+            }
+
+            // ======================================
+            // LEER ARCHIVO
+            // ======================================
+
+            const archivo = input.files[0];
+
+            const lector = new FileReader();
+
+            lector.onload = function(evento) {
+
+                const contenido = evento.target.result;
+
+                // ==============================
+                // PREPROCESAR
+                // ==============================
+
+                const tokens =
+                    preprocessTexto(contenido);
+
+                // ==============================
+                // MOSTRAR PRIMERAS 10
+                // ==============================
+
+                const primeras10 =
+                    tokens.slice(0, 10);
+
+                resultado.innerHTML = `
+
+<b>Documento procesado correctamente</b>
+
+<br><br>
+
+<b>Total tokens:</b>
+
+${tokens.length}
+
+<br><br>
+
+<b>Primeras 10 palabras:</b>
+
+<br><br>
+
+${primeras10.join(" ")}
+
+                `;
+            };
+
+            // ======================================
+            // LEER COMO TEXTO
+            // ======================================
+
+            lector.readAsText(archivo);
+        }
+
+    </script>
+
+</body>
+</html>

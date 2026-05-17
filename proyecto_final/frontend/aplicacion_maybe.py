@@ -1,8 +1,9 @@
+'''
 import streamlit as st
 import json
 import os
 from pypdf import PdfReader
-from reglas_proyecto import verbs_rules, exceptions, reglas_morfologicas
+# from reglas_proyecto import verbs_rules, exceptions, reglas_morfologicas
 
 #cerpeta de corpus
 CARPETA_CORPUS = "corpus"
@@ -340,3 +341,4 @@ with col_der:
 
 
 st.caption("Proyecto PLN · Detector de Plagio")
+'''

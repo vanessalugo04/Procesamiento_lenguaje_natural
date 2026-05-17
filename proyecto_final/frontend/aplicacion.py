@@ -1,4 +1,4 @@
-import streamlit as st
+'''import streamlit as st
 from pypdf import PdfReader
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
@@ -244,3 +244,4 @@ if st.button("Procesar documentos"):
 
 st.markdown("---")
 st.caption("Proyecto PLN")
+'''
