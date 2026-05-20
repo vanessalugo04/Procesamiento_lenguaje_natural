@@ -23,47 +23,34 @@ def index():
 
 @app.route('/analizar', methods=['POST'])
 def analizar_documento():
-    if 'archivo' not in request.files:
-        return jsonify({"exito": False, "error": "No se seleccionó ningún archivo"}), 400
-    
-    file = request.files['archivo']
-    
-    if file.filename == '':
-        return jsonify({"exito": False, "error": "Nombre de archivo vacío"}), 400
-    
-    if file and file_allowed(file.filename):
-        filename = secure_filename(file.filename)
-        ruta_guardado = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(ruta_guardado)
-        
-        try:
+    try:
+            # 1. Ejecutar tu pipeline de preprocesamiento real
             resultado_prepro = pipeline_procesamiento(ruta_guardado)
             
             if not resultado_prepro["exito"]:
                 return jsonify({"exito": False, "error": resultado_prepro["error"]}), 400
             
+            # Obtener la lista de todos los tokens lematizados del PDF
             tokens_usuario = resultado_prepro["resultado_lematizado"]
             
-            # Simulación de porcentajes por ahora
+            # Tomar únicamente los primeros 10 tokens reales
+            primeros_10_tokens = tokens_usuario[:10]
+            
+            # Porcentajes de prueba (temporales)
             porcentaje_plagio = 24.5
             porcentaje_ia = 12.0
             
+            # ENVIAMOS LOS DATOS REALES AL FRONTEND
             return jsonify({
                 "exito": True,
                 "nombre_archivo": filename,
                 "total_tokens": len(tokens_usuario),
+                "primeros_tokens": primeros_10_tokens,  # <-- Enviamos el arreglo real
                 "plagio": porcentaje_plagio,
                 "ia": porcentaje_ia,
                 "mensaje": "Análisis completado"
             })
-            
-        except Exception as e:
-            return jsonify({"exito": False, "error": f"Error interno: {str(e)}"}), 500
-        finally:
-            if os.path.exists(ruta_guardado):
-                os.remove(ruta_guardado)
-                
-    return jsonify({"exito": False, "error": "Solo se aceptan PDFs."}), 400
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
