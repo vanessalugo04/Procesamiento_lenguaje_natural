@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procesador de Textos NLP - Detector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
+
+    <nav class="bg-white shadow-sm border-b border-gray-200 py-4 px-6 mb-8">
+        <div class="max-w-5xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <i data-lucide="shield-alert" class="text-indigo-600 w-8 h-8"></i>
+                <span
+                    class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    AntiPlagio / IA Detector
+                </span>
+            </div>
+            <span class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-semibold">Procesador NLP
+                v1.0</span>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 pb-12">
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 transition-all hover:shadow-md">
+            <div class="text-center max-w-md mx-auto mb-6">
+                <h1 class="text-2xl font-extrabold text-gray-900 mb-2">Analiza tu Documento</h1>
+                <p class="text-sm text-gray-500">Sube un archivo PDF para extraer sus tokens, buscar plagio en el corpus
+                    y detectar escritura por Inteligencia Artificial.</p>
+            </div>
+
+            <form id="formAnalisis" class="space-y-4">
+                <div
+                    class="border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-indigo-500 transition-colors bg-gray-50 flex flex-col items-center justify-center cursor-pointer group">
+                    <i data-lucide="file-text"
+                        class="text-gray-400 group-hover:text-indigo-500 w-12 h-12 mb-3 transition-colors"></i>
+                    <input type="file" id="inputArchivo" accept=".pdf"
+                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                        required>
+                </div>
+
+                <button type="button" id="btnAnalizar"
+                    class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl shadow-sm transition-all transform active:scale-95 flex items-center justify-center space-x-2">
+                    <i data-lucide="cpu" class="w-5 h-5"></i>
+                    <span id="txtBoton">Preprocesar y Analizar Documento</span>
+                </button>
+            </form>
+        </div>
+
+        <div id="seccionResultados" class="hidden space-y-6">
+
+            <div
+                class="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-xl flex items-center space-x-3">
+                <i data-lucide="check-circle-2" class="text-emerald-600 w-5 h-5"></i>
+                <span class="font-medium">¡Documento procesado correctamente en el Pipeline de PLN!</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                        <i data-lucide="binary" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">Total de Tokens</p>
+                        <h3 id="resTokens" class="text-2xl font-bold text-gray-900">-</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-500 font-medium">Nivel de Plagio</span>
+                        <span id="resPlagioBadge"
+                            class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Moderado</span>
+                    </div>
+                    <div class="flex items-baseline space-x-1">
+                        <span id="resPlagio" class="text-3xl font-extrabold text-gray-900">-</span>
+                        <span class="text-gray-500 font-semibold">%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2 mt-3">
+                        <div id="barPlagio" class="bg-amber-500 h-2 rounded-full transition-all duration-500"
+                            style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-500 font-medium">Detección de IA</span>
+                        <span id="resIABadge"
+                            class="text-xs font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700">Alto</span>
+                    </div>
+                    <div class="flex items-baseline space-x-1">
+                        <span id="resIA" class="text-3xl font-extrabold text-gray-900">-</span>
+                        <span class="text-gray-500 font-semibold">%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2 mt-3">
+                        <div id="barIA" class="bg-red-500 h-2 rounded-full transition-all duration-500"
+                            style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center space-x-2 border-b border-gray-100 pb-4 mb-4">
+                    <i data-lucide="text-quote" class="text-gray-400 w-5 h-5"></i>
+                    <h3 class="font-bold text-gray-900">Muestra de Tokens Lematizados</h3>
+                </div>
+                <p class="text-xs text-gray-400 mb-3 font-mono">Nombre del archivo: <span id="resArchivo"></span></p>
+                <div id="contenedorPalabras"
+                    class="flex flex-wrap gap-2 text-sm bg-gray-50 p-4 rounded-xl border border-gray-100 min-h-[50px]">
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Inicializar los iconos de Lucide
+        lucide.createIcons();
+
+        document.getElementById('btnAnalizar').addEventListener('click', async () => {
+            const inputArchivo = document.getElementById('inputArchivo');
+            const seccionResultados = document.getElementById('seccionResultados');
+            const btn = document.getElementById('btnAnalizar');
+            const txtBoton = document.getElementById('txtBoton');
+
+            if (inputArchivo.files.length === 0) {
+                alert("Por favor, selecciona un archivo PDF primero.");
+                return;
+            }
+
+            const archivo = inputArchivo.files[0];
+            const formData = new FormData();
+            formData.append('archivo', archivo);
+
+            try {
+                // Estado de carga visual
+                btn.disabled = true;
+                btn.classList.add('opacity-75', 'cursor-not-allowed');
+                txtBoton.innerText = "Procesando en el Pipeline NLP...";
+                seccionResultados.classList.add('hidden');
+
+                const respuesta = await fetch('/analizar', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const datos = await respuesta.json();
+
+                if (datos.exito) {
+                    // 1. Inyectar datos numéricos y de texto
+                    document.getElementById('resArchivo').innerText = datos.nombre_archivo;
+                    document.getElementById('resTokens').innerText = datos.total_tokens.toLocaleString();
+                    document.getElementById('resPlagio').innerText = datos.plagio;
+                    document.getElementById('resIA').innerText = datos.ia;
+
+                    // 2. Animar barras de progreso
+                    document.getElementById('barPlagio').style.width = datos.plagio + '%';
+                    document.getElementById('barIA').style.width = datos.ia + '%';
+
+                    // 3. Renderizar las palabras/tokens simulando lo que devuelve tu backend
+                    const contenedor = document.getElementById('contenedorPalabras');
+                    contenedor.innerHTML = ''; // Limpiar previo
+
+                    // Simulamos mostrar los primeros tokens formateados estéticamente
+                    const palabrasFalsas = ["pdf", "obj", "type", "catalog", "pages", "lang", "structtreeroot", "markinfo"];
+                    palabrasFalsas.forEach(palabra => {
+                        const span = document.createElement('span');
+                        span.className = "bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg font-mono text-xs border border-indigo-100 shadow-sm";
+                        span.innerText = palabra;
+                        contenedor.appendChild(span);
+                    });
+
+                    // Revelar la sección completa con animación elegante
+                    seccionResultados.classList.remove('hidden');
+
+                } else {
+                    alert("Error en el pipeline: " + datos.error);
+                }
+
+            } catch (error) {
+                console.error("Error de conexión:", error);
+                alert("No se pudo conectar con el servidor de Flask.");
+            } finally {
+                // Restaurar botón al estado original
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                txtBoton.innerText = "Preprocesar y analizar documento";
+            }
+        });
+    </script>
+</body>
+
+</html>

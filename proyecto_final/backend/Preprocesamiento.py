@@ -1,8 +1,8 @@
 from pypdf import PdfReader
 import numpy as np
 
-import Stopwords
-import Reglas_Lematizador
+from backend import Stopwords
+from backend import Reglas_Lematizador
 
 
 
