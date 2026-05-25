@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 # Importamos tus módulos personalizados
 from backend.Preprocesamiento import pipeline_procesamiento
 from backend.Clasificador import matriz_bag_words, NaiveBayesDesdeCero
+from backend.Plagio import pipeline_plagio_hibrido
 
 app = Flask(__name__)
 
@@ -114,8 +115,17 @@ def analizar_documento():
             tema_detectado = modelo_tema.predict(X_usuario)[0]
             
             # Porcentajes de prueba (Siguientes módulos)
-            porcentaje_plagio = 24.5
-            porcentaje_ia = 12.0
+            #porcentaje_plagio = 24.5
+            resultados_plagio = pipeline_plagio_hibrido(tokens_usuario, ruta_corpus="corpus/corpus_procesado.json")
+            
+            # Tomamos el porcentaje del documento que haya salido con mayor similitud (el top 1)
+            if len(resultados_plagio) > 0:
+                porcentaje_plagio = resultados_plagio[0]["probabilidad_plagio"]
+            else:
+                porcentaje_plagio = 0.0
+            
+            # Detección de IA (Este lo dejamos estático por ahora para tu siguiente fase)
+            porcentaje_ia = 12.0 #TRABAJO A FUTUROOOOO LOL 
             
             return jsonify({
                 "exito": True,
