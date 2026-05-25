@@ -2,7 +2,6 @@ import numpy as np
 import json
 from gensim.models import FastText
 import os
-import Preprocesamiento
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -132,7 +131,7 @@ def construir_tfidf(corpus_tokenizado, tokens_usuario):
 
     return matriz_tfidf
 
-
+"""
 # PIPELINE
 def pipeline_plagio_hibrido(texto_usuario, ruta_corpus="../corpus/corpus_procesado.json"):
 
@@ -201,6 +200,62 @@ def pipeline_plagio_hibrido(texto_usuario, ruta_corpus="../corpus/corpus_procesa
     resultados_ordenados = sorted(
         resultados,
         key=lambda x: x["probabilidad_plagio"],
+        reverse=True
+    )
+
+    return resultados_ordenados[:5]"""
+
+# Modificamos la función para que reciba directamente los tokens que ya limpió app.py
+def pipeline_plagio_hibrido(tokens_usuario, ruta_corpus="corpus/corpus_procesado.json"):
+
+    # corpus
+    documentos, corpus_tokenizado = cargar_datos(ruta_corpus)
+
+    # Convertimos los tokens a un texto unido para que la función de N-gramas funcione
+    texto_usuario = " ".join(tokens_usuario)
+
+    # TF-IDF
+    matriz_tfidf = construir_tfidf(corpus_tokenizado, tokens_usuario)
+    indice_usuario = matriz_tfidf.shape[0] - 1
+    vector_usuario_tfidf = matriz_tfidf[indice_usuario]
+
+    # trigramas
+    perfil_usuario = perfil_ngramas(texto_usuario, n=3)
+
+    # fasttext
+    modelo_ft = cargar_modelo_fasttext()
+    vector_usuario_ft = obtener_vector_fasttext(modelo_ft, tokens_usuario)
+
+    resultados = []
+
+    # comparacion
+    for i, doc in enumerate(documentos):
+        texto_doc = doc["texto_original"]
+        tokens_doc = corpus_tokenizado[i]
+
+        perfil_doc = perfil_ngramas(texto_doc, n=3)
+        score_ngram = similitud_ngramas(perfil_usuario, perfil_doc)
+
+        vector_doc_tfidf = matriz_tfidf[i]
+        score_tfidf = cosine_similarity(vector_usuario_tfidf, vector_doc_tfidf)[0][0]
+
+        vector_doc_ft = obtener_vector_fasttext(modelo_ft, tokens_doc)
+        score_ft = similitud_coseno_vectores(vector_usuario_ft, vector_doc_ft)
+
+        # score final
+        score_final = ((score_ngram * 0.30) + (score_tfidf * 0.30) + (score_ft * 0.40))
+
+        resultados.append({
+            "titulo": doc["titulo"],
+            "score_ngramas": round(score_ngram * 100, 2),
+            "score_tfidf": round(score_tfidf * 100, 2),
+            "score_fasttext": round(score_ft * 100, 2),
+            "probabilidad_plagio": round(score_final * 100, 2)
+        })
+
+    resultados_ordenados = sorted(
+        resultados,
+        key=lambda x: x["probabilidad_plagio"],     
         reverse=True
     )
 
