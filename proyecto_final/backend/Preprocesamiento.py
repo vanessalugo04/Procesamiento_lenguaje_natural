@@ -135,6 +135,10 @@ def lematizador(tokens):
     return resultado
 
 # PIPELINE PARA PRIMER LIMPIEZA DEL ARCHIVO DE USUARIO XD 
+import re  # Asegúrate de que esté importado al inicio de Preprocesamiento.py
+
+# ... (Tus otras funciones se quedan exactamente igual)
+
 def pipeline_procesamiento(archivo):
     texto = extraer_texto_pdf(archivo)
 
@@ -145,8 +149,19 @@ def pipeline_procesamiento(archivo):
     tokens = tokenizador(texto_min)
     tokens_lematizados = lematizador(tokens)
     
+    # -------------------------------------------------------------
+    # SEGUNDA CAPA DE LIMPIEZA CON EXPRESIONES REGULARES (Añadir aquí)
+    # -------------------------------------------------------------
+    tokens_filtrados = []
+    # Expresión regular: solo permite palabras con letras de 3 o más caracteres
+    patron_letras = re.compile(r'^[a-zA-ZáéíóúüñÑ]{3,}$')
+    
+    for token in tokens_lematizados:
+        # Si el token cumple con la expresión regular, se conserva
+        if patron_letras.match(token):
+            tokens_filtrados.append(token)
+    
     return {
         "exito": True,
-        "resultado_lematizado": tokens_lematizados
+        "resultado_lematizado": tokens_filtrados  # <-- Ahora devolvemos la lista refinada
     }
-    
