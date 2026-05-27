@@ -2,3 +2,9 @@ venv/
 .ipynb_checkpoints/
 corpus_total.json
 corpus_procesado.json
+fasttext.model
+fasttext.model.trainables.syn1neg.npy
+fasttext.model.trainables.wv.vectors.npy
+fasttext.model.trainables.wv.vectors_ngrams.npy
+*.npy
+*.model
