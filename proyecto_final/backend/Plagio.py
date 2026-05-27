@@ -103,7 +103,7 @@ def similitud_coseno_vectores(vec1, vec2):
     return cosine_similarity(vec1, vec2)[0][0]
 
 # CARGAR CORPUS
-def cargar_datos(ruta_corpus="../corpus/corpus_procesado.json"):
+def cargar_datos(ruta_corpus="corpus/corpus_procesado.json"):
     with open(ruta_corpus, "r", encoding="utf-8") as f:
         documentos = json.load(f)
     corpus_tokenizado = []

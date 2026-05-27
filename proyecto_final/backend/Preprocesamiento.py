@@ -135,9 +135,8 @@ def lematizador(tokens):
     return resultado
 
 # PIPELINE PARA PRIMER LIMPIEZA DEL ARCHIVO DE USUARIO XD 
-import re  # Asegúrate de que esté importado al inicio de Preprocesamiento.py
+import re  
 
-# ... (Tus otras funciones se quedan exactamente igual)
 
 def pipeline_procesamiento(archivo):
     texto = extraer_texto_pdf(archivo)
@@ -163,5 +162,5 @@ def pipeline_procesamiento(archivo):
     
     return {
         "exito": True,
-        "resultado_lematizado": tokens_filtrados  # <-- Ahora devolvemos la lista refinada
+        "resultado_lematizado": tokens_filtrados  # return de la lista refinada
     }
