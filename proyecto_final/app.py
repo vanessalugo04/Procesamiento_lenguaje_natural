@@ -2,10 +2,12 @@ import os
 from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 
-# Importamos tus módulos personalizados
+# Importamos los módulos del preprocesamiento y plagio
 from backend.Preprocesamiento import pipeline_procesamiento
-from backend.Clasificador import matriz_bag_words, NaiveBayesDesdeCero
 from backend.Plagio import pipeline_plagio_hibrido
+
+# importamos el mod del clasificador de tema
+from backend.Clasificador import modelo_tema, vector_unico, matriz_bag_words
 
 app = Flask(__name__)
 
@@ -15,67 +17,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-
-# =========================================================================
-# ENTRENAMIENTO SIMULADO DEL CLASIFICADOR (Vocabulario base de desarrollo)
-# =========================================================================
-# 1. Vocabulario global con palabras clave muy específicas por cada área semántica
-vector_unico = [
-    # Astronomía
-    "planeta", "galaxia", "telescopio",
-    # Gastronomía
-    "receta", "ingrediente", "cocinar",
-    # Finanzas
-    "banco", "inflacion", "inversion",
-    # Medicina
-    "sintoma", "paciente", "medico",
-    # Derecho
-    "ley", "abogado", "tribunal",
-    # Música
-    "acorde", "melodia", "instrumento",
-    # Deportes
-    "balon", "entrenar", "competencia",
-    # Botánica
-    "planta", "clorofila", "raiz",
-    # Arqueología
-    "fosil", "ruina", "antiguo",
-    # Computación
-    "codigo", "software", "servidor", "inteligencia", "artificial"
-]
-
-# 2. Corpus de entrenamiento con dos mini-documentos de ejemplo por cada uno de los 10 temas
-corpus_entrenamiento = [
-    ["planeta", "galaxia", "telescopio"], ["planeta", "telescopio"], # Astronomía
-    ["receta", "ingrediente", "cocinar"], ["receta", "cocinar"],     # Gastronomía
-    ["banco", "inflacion", "inversion"], ["banco", "inversion"],     # Finanzas
-    ["sintoma", "paciente", "medico"], ["sintoma", "medico"],        # Medicina
-    ["ley", "abogado", "tribunal"], ["ley", "tribunal"],             # Derecho
-    ["acorde", "melodia", "instrumento"], ["acorde", "instrumento"], # Música
-    ["balon", "entrenar", "competencia"], ["balon", "entrenar"],     # Deportes
-    ["planta", "clorofila", "raiz"], ["planta", "raiz"],             # Botánica
-    ["fosil", "ruina", "antiguo"], ["ruina", "antiguo"],             # Arqueología
-    ["codigo", "software", "servidor"], ["codigo", "software"]       # Computación
-]
-
-# 3. Las 10 etiquetas duplicadas correspondientes al corpus (2 documentos por tema)
-y_entrenamiento = [
-    "Astronomia", "Astronomia",
-    "Gastronomia", "Gastronomia",
-    "Finanzas", "Finanzas",
-    "Medicina", "Medicina",
-    "Derecho", "Derecho",
-    "Musica", "Musica",
-    "Deportes", "Deportes",
-    "Botanica", "Botanica",
-    "Arqueologia", "Arqueologia",
-    "Computacion", "Computacion"
-]
-
-# Instanciar y entrenar nuestro modelo matemático propio desde el inicio
-X_train = matriz_bag_words(corpus_entrenamiento, vector_unico)
-modelo_tema = NaiveBayesDesdeCero()
-modelo_tema.fit(X_train, y_entrenamiento)
-# =========================================================================
 
 def file_allowed(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -115,6 +56,8 @@ def analizar_documento():
             tema_detectado = modelo_tema.predict(X_usuario)[0]
             
             # Porcentajes de prueba (Siguientes módulos)
+            porcentaje_plagio = 24.5
+            porcentaje_ia = 12.0
             #porcentaje_plagio = 24.5
             resultados_plagio = pipeline_plagio_hibrido(tokens_usuario, ruta_corpus="corpus/corpus_procesado.json")
             

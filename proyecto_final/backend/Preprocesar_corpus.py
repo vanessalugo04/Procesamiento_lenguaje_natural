@@ -1,5 +1,5 @@
 import json
-import Preprocesamiento
+from backend import Preprocesamiento
 
 # CARGA DE CORPUS
 def cargar_corpus(ruta_corpus):
@@ -83,9 +83,9 @@ def guardar_corpus(corpus_procesado, ruta_salida):
 # PIPELINE PARA EL PREPROCESAMIENTO DEL CORPUS
 def pipeline_preproceso_corpus():
 
-    ruta_corpus = "../corpus/corpus_total.json"
+    ruta_corpus = "corpus/corpus_total.json"
 
-    ruta_salida = "../corpus/corpus_procesado.json"
+    ruta_salida = "corpus/corpus_procesado.json"
 
     corpus = cargar_corpus(ruta_corpus)
 
