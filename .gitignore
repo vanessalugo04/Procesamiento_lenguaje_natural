@@ -1,4 +1,5 @@
 .venv/
+__pycache__/
 .ipynb_checkpoints/
 corpus_total.json
 corpus_procesado.json
