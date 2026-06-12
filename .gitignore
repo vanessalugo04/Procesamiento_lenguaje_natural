@@ -1,4 +1,4 @@
-venv/
+.venv/
 .ipynb_checkpoints/
 corpus_total.json
 corpus_procesado.json

@@ -1,0 +1,7 @@
+datasets
+gensim
+scikit-learn
+flask
+pypdf
+numpy
+pandas
