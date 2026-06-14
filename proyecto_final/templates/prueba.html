@@ -15,11 +15,13 @@
         <div class="max-w-5xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <i data-lucide="shield-alert" class="text-indigo-600 w-8 h-8"></i>
-                <span class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <span
+                    class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                     AntiPlagio / IA Detector
                 </span>
             </div>
-            <span class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-semibold">Procesador NLP v2.1</span>
+            <span class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-semibold">Procesador NLP v3.1
+            </span>
         </div>
     </nav>
 
@@ -28,31 +30,57 @@
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 transition-all hover:shadow-md">
             <div class="text-center max-w-md mx-auto mb-6">
                 <h1 class="text-2xl font-extrabold text-gray-900 mb-2">Analiza tu Documento</h1>
-                <p class="text-sm text-gray-500">Sube un archivo PDF para extraer sus tokens, buscar plagio en el corpus y detectar escritura por Inteligencia Artificial.</p>
+                <p class="text-sm text-gray-500">Sube un archivo PDF para extraer sus tokens, buscar plagio en el corpus
+                    y detectar escritura por Inteligencia Artificial.</p>
             </div>
 
             <form id="formAnalisis" class="space-y-4">
-                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-indigo-500 transition-colors bg-gray-50 flex flex-col items-center justify-center cursor-pointer group">
-                    <i data-lucide="file-text" class="text-gray-400 group-hover:text-indigo-500 w-12 h-12 mb-3 transition-colors"></i>
-                    <input type="file" id="inputArchivo" accept=".pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" required>
+                <div
+                    class="border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-indigo-500 transition-colors bg-gray-50 flex flex-col items-center justify-center cursor-pointer group">
+                    <i data-lucide="file-text"
+                        class="text-gray-400 group-hover:text-indigo-500 w-12 h-12 mb-3 transition-colors"></i>
+                    <input type="file" id="inputArchivo" accept=".pdf"
+                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                        required>
                 </div>
 
-                <button type="button" id="btnAnalizar" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl shadow-sm transition-all transform active:scale-95 flex items-center justify-center space-x-2">
+                <button type="button" id="btnAnalizar"
+                    class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl shadow-sm transition-all transform active:scale-95 flex items-center justify-center space-x-2">
                     <i data-lucide="cpu" class="w-5 h-5"></i>
                     <span id="txtBoton">Preprocesar y Analizar Documento</span>
                 </button>
             </form>
         </div>
 
+        <!-- Contenedor de la barra de progreso -->
+        <div id="contenedorProgreso"
+            class="hidden bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8 transition-all duration-300">
+            <div class="flex justify-between items-center mb-2">
+                <span id="txtEstadoProgreso" class="text-sm font-semibold text-gray-700">Iniciando
+                    procesamiento...</span>
+                <span id="txtPorcentajeProgreso" class="text-sm font-bold text-indigo-600 font-mono">0%</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                <div id="barraProgreso"
+                    class="bg-gradient-to-r from-indigo-600 to-purple-600 h-full rounded-full transition-all duration-500 ease-out"
+                    style="width: 0%"></div>
+            </div>
+            <div class="mt-3 flex items-center space-x-2 text-xs text-gray-500">
+                <i data-lucide="loader" class="w-4 h-4 animate-spin text-indigo-500"></i>
+                <span id="txtSubEstadoProgreso">Cargando archivo PDF en el pipeline...</span>
+            </div>
+        </div>
+
         <div id="seccionResultados" class="hidden space-y-6">
 
-            <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-xl flex items-center space-x-3">
+            <div
+                class="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-xl flex items-center space-x-3">
                 <i data-lucide="check-circle-2" class="text-emerald-600 w-5 h-5"></i>
                 <span class="font-medium">¡Documento procesado correctamente en el Pipeline de PLN!</span>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-    
+
                 <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3">
                     <div class="p-3 bg-purple-50 text-purple-600 rounded-xl">
                         <i data-lucide="tags" class="w-5 h-5"></i>
@@ -62,7 +90,7 @@
                         <h3 id="resTema" class="text-base font-bold text-purple-700">-</h3>
                     </div>
                 </div>
-                
+
                 <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3">
                     <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
                         <i data-lucide="binary" class="w-5 h-5"></i>
@@ -76,28 +104,32 @@
                 <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-xs text-gray-500 font-medium">Plagio</span>
-                        <span id="resPlagioBadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700">Moderado</span>
+                        <span id="resPlagioBadge"
+                            class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700">Moderado</span>
                     </div>
                     <div class="flex items-baseline space-x-0.5">
                         <span id="resPlagio" class="text-xl font-extrabold text-gray-900">-</span>
                         <span class="text-xs text-gray-500 font-semibold">%</span>
                     </div>
                     <div class="w-full bg-gray-100 rounded-full h-1.5 mt-2">
-                        <div id="barPlagio" class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        <div id="barPlagio" class="bg-amber-500 h-1.5 rounded-full transition-all duration-500"
+                            style="width: 0%"></div>
                     </div>
                 </div>
 
                 <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-xs text-gray-500 font-medium">Detección IA</span>
-                        <span id="resIABadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-700">Alto</span>
+                        <span id="resIABadge"
+                            class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-700">Alto</span>
                     </div>
                     <div class="flex items-baseline space-x-0.5">
                         <span id="resIA" class="text-xl font-extrabold text-gray-900">-</span>
                         <span class="text-xs text-gray-500 font-semibold">%</span>
                     </div>
                     <div class="w-full bg-gray-100 rounded-full h-1.5 mt-2">
-                        <div id="barIA" class="bg-red-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        <div id="barIA" class="bg-red-500 h-1.5 rounded-full transition-all duration-500"
+                            style="width: 0%"></div>
                     </div>
                 </div>
             </div>
@@ -108,7 +140,8 @@
                     <h3 class="font-bold text-gray-900">Muestra de Tokens Lematizados</h3>
                 </div>
                 <p class="text-xs text-gray-400 mb-3 font-mono">Nombre del archivo: <span id="resArchivo"></span></p>
-                <div id="contenedorPalabras" class="flex flex-wrap gap-2 text-sm bg-gray-50 p-4 rounded-xl border border-gray-100 min-h-[50px]">
+                <div id="contenedorPalabras"
+                    class="flex flex-wrap gap-2 text-sm bg-gray-50 p-4 rounded-xl border border-gray-100 min-h-[50px]">
                 </div>
             </div>
 
@@ -121,6 +154,11 @@
         document.getElementById('btnAnalizar').addEventListener('click', async () => {
             const inputArchivo = document.getElementById('inputArchivo');
             const seccionResultados = document.getElementById('seccionResultados');
+            const contenedorProgreso = document.getElementById('contenedorProgreso');
+            const barraProgreso = document.getElementById('barraProgreso');
+            const txtEstadoProgreso = document.getElementById('txtEstadoProgreso');
+            const txtPorcentajeProgreso = document.getElementById('txtPorcentajeProgreso');
+            const txtSubEstadoProgreso = document.getElementById('txtSubEstadoProgreso');
             const btn = document.getElementById('btnAnalizar');
             const txtBoton = document.getElementById('txtBoton');
 
@@ -133,12 +171,47 @@
             const formData = new FormData();
             formData.append('archivo', archivo);
 
-            try {
-                btn.disabled = true;
-                btn.classList.add('opacity-75', 'cursor-not-allowed');
-                txtBoton.innerText = "Procesando en el Pipeline NLP...";
-                seccionResultados.classList.add('hidden');
+            // Mostrar el contenedor de progreso y reiniciar valores
+            contenedorProgreso.classList.remove('hidden');
+            seccionResultados.classList.add('hidden');
+            barraProgreso.style.width = '0%';
+            txtPorcentajeProgreso.innerText = '0%';
+            txtEstadoProgreso.innerText = "Preparando archivo...";
+            txtSubEstadoProgreso.innerText = "Cargando archivo PDF en el pipeline...";
 
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            txtBoton.innerText = "Procesando...";
+
+            // Simular el progreso en fases acordes al Pipeline real
+            let progreso = 0;
+            const pasos = [
+                { limit: 15, text: "Extrayendo texto...", sub: "Leyendo páginas del documento PDF..." },
+                { limit: 35, text: "Normalizando texto...", sub: "Convirtiendo caracteres a minúsculas y limpiando ruido..." },
+                { limit: 60, text: "Tokenizando...", sub: "Separando palabras y eliminando stopwords del corpus..." },
+                { limit: 80, text: "Lematizando...", sub: "Buscando lemas de cada token mediante reglas morfológicas..." },
+                { limit: 95, text: "Analizando...", sub: "Calculando probabilidades de Naive Bayes y buscando similitudes de plagio..." }
+            ];
+
+            let pasoActual = 0;
+            const intervalo = setInterval(() => {
+                if (pasoActual < pasos.length) {
+                    const paso = pasos[pasoActual];
+                    if (progreso < paso.limit) {
+                        progreso += Math.floor(Math.random() * 3) + 1; // Incremento aleatorio fluido
+                        if (progreso > paso.limit) progreso = paso.limit;
+
+                        barraProgreso.style.width = progreso + '%';
+                        txtPorcentajeProgreso.innerText = progreso + '%';
+                        txtEstadoProgreso.innerText = paso.text;
+                        txtSubEstadoProgreso.innerText = paso.sub;
+                    } else {
+                        pasoActual++;
+                    }
+                }
+            }, 80);
+
+            try {
                 const respuesta = await fetch('/analizar', {
                     method: 'POST',
                     body: formData
@@ -146,20 +219,44 @@
 
                 const datos = await respuesta.json();
 
+                // Detener intervalo de simulación
+                clearInterval(intervalo);
+
                 if (datos.exito) {
+                    // Completar barra a 100% de forma fluida
+                    barraProgreso.style.width = '100%';
+                    txtPorcentajeProgreso.innerText = '100%';
+                    txtEstadoProgreso.innerText = "¡Procesamiento completo!";
+                    txtSubEstadoProgreso.innerText = "Mostrando resultados del análisis...";
+
+                    // Pequeño retardo para que se aprecie la finalización antes de cambiar la interfaz
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
                     document.getElementById('resArchivo').innerText = datos.nombre_archivo;
                     document.getElementById('resTokens').innerText = datos.total_tokens.toLocaleString();
                     document.getElementById('resPlagio').innerText = datos.plagio;
                     document.getElementById('resIA').innerText = datos.ia;
-                    document.getElementById('resTema').innerText = datos.tema_predicho; 
-                    
+                    document.getElementById('resTema').innerText = datos.tema_predicho;
+
                     document.getElementById('barPlagio').style.width = datos.plagio + '%';
                     document.getElementById('barIA').style.width = datos.ia + '%';
 
-                    const contenedor = document.getElementById('contenedorPalabras');
-                    contenedor.innerHTML = ''; 
+                    // Actualizar el badge de plagio basado en la similitud de forma dinâmica y vistosa
+                    const badgePlagio = document.getElementById('resPlagioBadge');
+                    if (datos.plagio < 20) {
+                        badgePlagio.innerText = "Bajo";
+                        badgePlagio.className = "text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200";
+                    } else if (datos.plagio < 50) {
+                        badgePlagio.innerText = "Moderado";
+                        badgePlagio.className = "text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200";
+                    } else {
+                        badgePlagio.innerText = "Alto";
+                        badgePlagio.className = "text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200";
+                    }
 
-                    // MODIFICADO: Ahora itera dinámicamente sobre los datos REALES enviados por Flask
+                    const contenedor = document.getElementById('contenedorPalabras');
+                    contenedor.innerHTML = '';
+
                     datos.primeros_tokens.forEach(palabra => {
                         const span = document.createElement('span');
                         span.className = "bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg font-mono text-xs border border-indigo-100 shadow-sm";
@@ -167,13 +264,18 @@
                         contenedor.appendChild(span);
                     });
 
+                    // Ocultar progreso y mostrar resultados
+                    contenedorProgreso.classList.add('hidden');
                     seccionResultados.classList.remove('hidden');
 
                 } else {
+                    contenedorProgreso.classList.add('hidden');
                     alert("Error en el pipeline: " + datos.error);
                 }
 
             } catch (error) {
+                clearInterval(intervalo);
+                contenedorProgreso.classList.add('hidden');
                 console.error("Error de conexión:", error);
                 alert("No se pudo conectar con el servidor de Flask.");
             } finally {
