@@ -87,8 +87,5 @@ exceptions = {
 reglas_morfologicas = [
     ('ies', 'y'), 
     ('ves', 'f'),
-    ('es',  ''),
     ('s',   ''),
-    ('est', ''),
-    ('er',  ''),
 ]
