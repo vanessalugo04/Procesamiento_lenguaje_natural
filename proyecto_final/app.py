@@ -55,17 +55,20 @@ def analizar_documento():
             X_usuario = matriz_bag_words([tokens_usuario], vector_unico)
             tema_detectado = modelo_tema.predict(X_usuario)[0]
             
-            # Porcentajes de prueba (Siguientes módulos)
-            porcentaje_plagio = 24.5
-            porcentaje_ia = 12.0
-            #porcentaje_plagio = 24.5
-            resultados_plagio = pipeline_plagio_hibrido(tokens_usuario, ruta_corpus="corpus/corpus_procesado.json")
-            
-            # Tomamos el porcentaje del documento que haya salido con mayor similitud (el top 1)
-            if len(resultados_plagio) > 0:
-                porcentaje_plagio = resultados_plagio[0]["probabilidad_plagio"]
-            else:
-                porcentaje_plagio = 0.0
+            # 3. DETECCIÓN DE PLAGIO GLOBAL
+            # El nuevo pipeline de BERT devuelve un diccionario, no una lista.
+            resultado_plagio = pipeline_plagio_hibrido(
+                tokens_usuario=tokens_usuario,
+                ruta_corpus="corpus/corpus_procesado.json",
+                top_n_candidatos=100,
+                top_n_preliminar=300,
+                tamano_fragmento=120,
+                top_fragmentos=3,
+                usar_tema=True
+            )
+
+            # Solo mostramos el plagio global en la app.
+            porcentaje_plagio = resultado_plagio["probabilidad_plagio"]
             
             # Detección de IA (Este lo dejamos estático por ahora para tu siguiente fase)
             porcentaje_ia = 12.0 #TRABAJO A FUTUROOOOO LOL 
