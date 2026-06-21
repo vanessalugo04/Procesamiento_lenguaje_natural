@@ -9,6 +9,9 @@ from backend.Plagio import pipeline_plagio_hibrido
 # importamos el mod del clasificador de tema
 from backend.Clasificador import modelo_tema, vector_unico, matriz_bag_words
 
+# importamos el detector de IA
+from backend.DetectorIA import pipeline_deteccion_ia
+
 app = Flask(__name__)
 
 UPLOAD_FOLDER = 'uploads'
@@ -48,6 +51,7 @@ def analizar_documento():
                 return jsonify({"exito": False, "error": resultado_prepro["error"]}), 400
             
             tokens_usuario = resultado_prepro["resultado_lematizado"]
+            texto_crudo = resultado_prepro["texto_crudo"]
             primeros_10_tokens = tokens_usuario[:10]
             
             # 2. CLASIFICACIÓN DEL TEMA REAL DESDE CERO
@@ -70,8 +74,8 @@ def analizar_documento():
             # Solo mostramos el plagio global en la app.
             porcentaje_plagio = resultado_plagio["probabilidad_plagio"]
             
-            # Detección de IA (Este lo dejamos estático por ahora para tu siguiente fase)
-            porcentaje_ia = 12.0 #TRABAJO A FUTUROOOOO LOL 
+            # Detección de IA con features estilométricas + BERT
+            porcentaje_ia = pipeline_deteccion_ia(texto_crudo, tokens_usuario)
             
             return jsonify({
                 "exito": True,

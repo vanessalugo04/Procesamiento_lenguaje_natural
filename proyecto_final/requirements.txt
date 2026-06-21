@@ -5,3 +5,5 @@ flask
 pypdf
 numpy
 pandas
+transformers
+torch

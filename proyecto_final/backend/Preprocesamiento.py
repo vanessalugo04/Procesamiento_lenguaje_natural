@@ -162,5 +162,6 @@ def pipeline_procesamiento(archivo):
     
     return {
         "exito": True,
+        "texto_crudo": texto,  # Texto original extraído del PDF (para el detector de IA)
         "resultado_lematizado": tokens_filtrados  # return de la lista refinada
     }
