@@ -186,19 +186,42 @@
             // Simular el progreso en fases acordes al Pipeline real
             let progreso = 0;
             const pasos = [
-                { limit: 15, text: "Extrayendo texto...", sub: "Leyendo páginas del documento PDF..." },
-                { limit: 35, text: "Normalizando texto...", sub: "Convirtiendo caracteres a minúsculas y limpiando ruido..." },
-                { limit: 60, text: "Tokenizando...", sub: "Separando palabras y eliminando stopwords del corpus..." },
-                { limit: 80, text: "Lematizando...", sub: "Buscando lemas de cada token mediante reglas morfológicas..." },
-                { limit: 95, text: "Analizando...", sub: "Calculando probabilidades de Naive Bayes y buscando similitudes de plagio..." }
+                { limit: 12, text: "Cargando archivo...", sub: "Subiendo documento al servidor..." },
+                { limit: 25, text: "Extrayendo texto...", sub: "Extrayendo caracteres del PDF..." },
+                { limit: 40, text: "Normalizando...", sub: "Convirtiendo a minúsculas y limpiando caracteres especiales..." },
+                { limit: 55, text: "Tokenizando...", sub: "Separando palabras y filtrando stopwords del corpus..." },
+                { limit: 70, text: "Lematizando...", sub: "Obteniendo formas base (lemas) mediante análisis lingüístico..." },
+                { limit: 80, text: "Clasificando tema...", sub: "Calculando probabilidades temáticas usando Naive Bayes..." },
+                { limit: 88, text: "Calculando plagio...", sub: "Comparando similitudes híbridas (N-Gramas, TF-IDF y FastText)..." },
+                { limit: 94, text: "Analizando estilometría...", sub: "Calculando métricas de estilo (Burstiness, Hapax, TTR)..." },
+                { limit: 98, text: "Detector de IA (BERT)...", sub: "Generando embeddings contextuales y comprimiendo vectores..." }
             ];
 
             let pasoActual = 0;
+            const mensajesEspera = [
+                "Procesando inferencia estadística...",
+                "Analizando distribución probabilística del texto...",
+                "Evaluando pesos en la regresión logística...",
+                "Verificando similitud de estilo del autor...",
+                "Finalizando compilación de resultados del análisis..."
+            ];
+            let msgIndice = 0;
+
             const intervalo = setInterval(() => {
                 if (pasoActual < pasos.length) {
                     const paso = pasos[pasoActual];
                     if (progreso < paso.limit) {
-                        progreso += Math.floor(Math.random() * 3) + 1; // Incremento aleatorio fluido
+                        // Desaceleración progresiva
+                        let incremento = 1;
+                        if (progreso < 50) {
+                            incremento = Math.floor(Math.random() * 3) + 1; // Fluido al inicio
+                        } else if (progreso < 80) {
+                            incremento = Math.random() > 0.4 ? 1 : 0; // Se ralentiza
+                        } else {
+                            incremento = Math.random() > 0.75 ? 1 : 0; // Muy lento para simular cómputo pesado
+                        }
+
+                        progreso += incremento;
                         if (progreso > paso.limit) progreso = paso.limit;
 
                         barraProgreso.style.width = progreso + '%';
@@ -207,6 +230,19 @@
                         txtSubEstadoProgreso.innerText = paso.sub;
                     } else {
                         pasoActual++;
+                    }
+                } else {
+                    // Si llega a 98% o más y la red aún está respondiendo, rotamos mensajes técnicos
+                    // para dar feedback dinámico y que el usuario vea que sigue procesando activamente
+                    if (progreso < 99 && Math.random() > 0.8) {
+                        progreso += 1;
+                        barraProgreso.style.width = progreso + '%';
+                        txtPorcentajeProgreso.innerText = progreso + '%';
+                    }
+                    if (Math.random() > 0.9) {
+                        txtEstadoProgreso.innerText = "Finalizando análisis...";
+                        txtSubEstadoProgreso.innerText = mensajesEspera[msgIndice % mensajesEspera.length];
+                        msgIndice++;
                     }
                 }
             }, 80);
