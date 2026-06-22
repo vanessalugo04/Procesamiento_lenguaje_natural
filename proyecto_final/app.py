@@ -97,5 +97,9 @@ def analizar_documento():
                 
     return jsonify({"exito": False, "error": "Solo se aceptan PDFs."}), 400
 
+'''if __name__ == '__main__':
+    app.run(debug=True, port=5000)'''
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    # Agrega use_reloader=False para evitar que la memoria colapse
+    app.run(debug=True, port=5000, use_reloader=False)

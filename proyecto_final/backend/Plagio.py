@@ -6,7 +6,47 @@ from transformers import BertTokenizer, BertModel
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+torch.set_num_threads(1)
+
+# =================================================================
+# 1. CARGA GLOBAL DE MODELOS Y CORPUS (WARM-UP)
+# Esto se ejecuta solo una vez cuando se inicia el servidor Flask.
+# =================================================================
+
+RUTA_MODELO_BERT = "bert-base-uncased"
+
+def inicializar_recursos_globales():
+    print("[PLAGIO] Cargando modelo BERT en memoria RAM (CPU)...")
+    try:
+        tokenizer = BertTokenizer.from_pretrained(RUTA_MODELO_BERT)
+        modelo = BertModel.from_pretrained(RUTA_MODELO_BERT)
+        modelo.to("cpu")
+        modelo.eval()
+    except Exception as e:
+        print(f"[ERROR BERT] No se pudo cargar BERT: {e}")
+        tokenizer, modelo = None, None
+    
+    print("[PLAGIO] Cargando corpus procesado...")
+    ruta_corpus_defecto = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "corpus", "corpus_procesado.json")
+    
+    try:
+        with open(ruta_corpus_defecto, "r", encoding="utf-8") as f:
+            documentos = json.load(f)
+        corpus_tokenizado = [doc["tokens_lematizados"] for doc in documentos]
+    except Exception as e:
+        print(f"[ERROR CORPUS] No se pudo cargar el corpus: {e}")
+        documentos, corpus_tokenizado = [], []
+
+    print("[OK] Recursos de plagio listos en memoria global.")
+    return tokenizer, modelo, documentos, corpus_tokenizado
+
+# Instanciamos las variables globales
+TOKENIZER_GLOBAL, MODELO_BERT_GLOBAL, DOCUMENTOS_GLOBAL, CORPUS_TOKENIZADO_GLOBAL = inicializar_recursos_globales()
+
+
+# =================================================================
 # N-GRAMAS
+# =================================================================
 
 def ngramas_caracteres(texto, n=3):
     texto = texto.lower().replace(" ", "")
@@ -15,7 +55,6 @@ def ngramas_caracteres(texto, n=3):
     for i in range(len(texto) - n + 1):
         lista.append(texto[i:i+n])
     return lista
-
 
 def perfil_ngramas(texto, n=3):
     perfil = {}
@@ -29,7 +68,6 @@ def perfil_ngramas(texto, n=3):
 
     return perfil
 
-
 def distancia(p1, p2):
     dist = 0
     todos = set(p1.keys()) | set(p2.keys())
@@ -41,10 +79,8 @@ def distancia(p1, p2):
 
     return dist
 
-
 def similitud_ngramas(perfil1, perfil2):
     dist = distancia(perfil1, perfil2)
-
     total = (sum(perfil1.values()) + sum(perfil2.values()))
 
     if total == 0:
@@ -57,7 +93,10 @@ def similitud_ngramas(perfil1, perfil2):
 
     return similitud
 
+
+# =================================================================
 # JACCARD
+# =================================================================
 
 def ngramas_palabras(tokens, n=3):
     lista = []
@@ -70,7 +109,6 @@ def ngramas_palabras(tokens, n=3):
         lista.append(ng)
 
     return lista
-
 
 def similitud_jaccard(tokens1, tokens2, n=3):
     ngramas1 = set(ngramas_palabras(tokens1, n))
@@ -87,28 +125,20 @@ def similitud_jaccard(tokens1, tokens2, n=3):
 
     return len(interseccion) / len(union)
 
+
+# =================================================================
 # SIMILITUD COSENO
+# =================================================================
 
 def similitud_coseno_vectores(vec1, vec2):
     vec1 = vec1.reshape(1, -1)
     vec2 = vec2.reshape(1, -1)
     return cosine_similarity(vec1, vec2)[0][0]
 
-# CARGAR CORPUS
 
-def cargar_datos(ruta_corpus="corpus/corpus_procesado.json"):
-    with open(ruta_corpus, "r", encoding="utf-8") as f:
-        documentos = json.load(f)
-
-    corpus_tokenizado = []
-
-    for doc in documentos:
-        corpus_tokenizado.append(doc["tokens_lematizados"])
-
-    return documentos, corpus_tokenizado
-
-
+# =================================================================
 # TF-IDF
+# =================================================================
 
 def construir_tfidf(corpus_tokenizado, tokens_usuario):
     corpus_texto = []
@@ -124,8 +154,6 @@ def construir_tfidf(corpus_tokenizado, tokens_usuario):
 
     return matriz_tfidf
 
-# TF-IDF PARA FRAGMENTOS
-
 def construir_tfidf_fragmentos(textos_fragmentos_corpus, textos_fragmentos_usuario):
     corpus_total = textos_fragmentos_corpus + textos_fragmentos_usuario
 
@@ -139,20 +167,15 @@ def construir_tfidf_fragmentos(textos_fragmentos_corpus, textos_fragmentos_usuar
 
     return matriz_corpus, matriz_usuario
 
-# BERT EN CPU
 
-RUTA_MODELO_BERT = "bert-base-uncased"
-
-
-def cargar_modelo_bert(nombre_modelo=RUTA_MODELO_BERT):
-    tokenizer = BertTokenizer.from_pretrained(nombre_modelo)
-    modelo = BertModel.from_pretrained(nombre_modelo)
-    modelo.to("cpu")
-    modelo.eval()
-    return tokenizer, modelo
-
+# =================================================================
+# BERT EN CPU (Funciones auxiliares)
+# =================================================================
 
 def obtener_vectores_bert(textos, tokenizer, modelo, batch_size=8, max_length=128):
+    if tokenizer is None or modelo is None:
+        return np.zeros((len(textos), 768)) # Fallback si BERT no cargó
+
     vectores = []
 
     with torch.no_grad():
@@ -190,7 +213,9 @@ def obtener_vectores_bert(textos, tokenizer, modelo, batch_size=8, max_length=12
     return np.vstack(vectores)
 
 
+# =================================================================
 # CLASIFICADOR TEMÁTICO OPCIONAL
+# =================================================================
 
 try:
     from backend import Clasificador
@@ -200,7 +225,6 @@ except Exception:
     except Exception:
         Clasificador = None
 
-
 def clasificar_tema(tokens):
     if Clasificador is None:
         return "SIN_TEMA"
@@ -209,7 +233,10 @@ def clasificar_tema(tokens):
     tema = Clasificador.modelo_tema.predict(X)[0]
     return tema
 
+
+# =================================================================
 # DICCIONARIOS DE CITAS Y EXCEPCIONES
+# =================================================================
 
 PALABRAS_CITA = [
     "according", "cited", "citation", "reference", "references",
@@ -220,34 +247,17 @@ PALABRAS_CITA = [
 ]
 
 FRASES_CITA = [
-    "according author",
-    "according study",
-    "previous research",
-    "research suggest",
-    "study show",
-    "study indicate",
-    "authors argue",
-    "authors state",
-    "paper present",
-    "article mention",
-    "source report",
-    "results study"
+    "according author", "according study", "previous research",
+    "research suggest", "study show", "study indicate",
+    "authors argue", "authors state", "paper present",
+    "article mention", "source report", "results study"
 ]
 
 FRASES_COMUNES_MENOR_PESO = [
-    "introduction",
-    "in conclusion",
-    "this paper",
-    "this study",
-    "this work",
-    "results show",
-    "results indicate",
-    "main objective",
-    "research objective",
-    "data analysis",
-    "future work"
+    "introduction", "in conclusion", "this paper", "this study",
+    "this work", "results show", "results indicate", "main objective",
+    "research objective", "data analysis", "future work"
 ]
-
 
 def calcular_ajuste_citas(tokens):
     texto = " ".join(tokens).lower()
@@ -275,7 +285,9 @@ def calcular_ajuste_citas(tokens):
     return factor, motivos
 
 
+# =================================================================
 # FRAGMENTACIÓN
+# =================================================================
 
 def aplanar_tokens(tokens):
     if len(tokens) == 0:
@@ -290,7 +302,6 @@ def aplanar_tokens(tokens):
 
     return tokens
 
-
 def crear_fragmento(tokens, numero, inicio):
     return {
         "numero_fragmento": numero,
@@ -300,14 +311,12 @@ def crear_fragmento(tokens, numero, inicio):
         "texto": " ".join(tokens)
     }
 
-
 def fragmentar_tokens(tokens, tamano_fragmento=120, min_tokens=20):
     fragmentos = []
 
     if len(tokens) == 0:
         return fragmentos
 
-    # Si viene como lista de listas, se respeta como párrafos ya tokenizados.
     if isinstance(tokens[0], list):
         numero = 1
         inicio = 0
@@ -339,7 +348,9 @@ def fragmentar_tokens(tokens, tamano_fragmento=120, min_tokens=20):
     return fragmentos
 
 
+# =================================================================
 # SELECCIÓN DE CANDIDATOS
+# =================================================================
 
 def seleccionar_candidatos(
     documentos,
@@ -349,6 +360,10 @@ def seleccionar_candidatos(
     top_n_preliminar=300,
     usar_tema=True
 ):
+    # Si el corpus está vacío, no hay candidatos
+    if not documentos or not corpus_tokenizado:
+        return [], "SIN_TEMA"
+
     matriz_tfidf = construir_tfidf(corpus_tokenizado, tokens_usuario)
 
     indice_usuario = matriz_tfidf.shape[0] - 1
@@ -397,7 +412,10 @@ def seleccionar_candidatos(
 
     return candidatos_ordenados[:top_n_candidatos], tema_usuario
 
+
+# =================================================================
 # SCORE FINAL
+# =================================================================
 
 def calcular_score_final(score_ngramas, score_jaccard, score_tfidf, score_bert, factor_citas):
     score_literal = (score_ngramas * 0.50) + (score_jaccard * 0.50)
@@ -412,18 +430,27 @@ def calcular_score_final(score_ngramas, score_jaccard, score_tfidf, score_bert, 
 
     return score_literal, score_base, score_final
 
-# PIPELINE PRINCIPAL
+
+# =================================================================
+# PIPELINE PRINCIPAL (ACTUALIZADO CON VARIABLES GLOBALES)
+# =================================================================
 
 def pipeline_plagio_hibrido(
     tokens_usuario,
-    ruta_corpus="corpus/corpus_procesado.json",
+    ruta_corpus="corpus/corpus_procesado.json", # Mantenemos el argumento para no romper app.py, pero usamos los globales
     top_n_candidatos=100,
     top_n_preliminar=300,
     tamano_fragmento=120,
     top_fragmentos=3,
     usar_tema=True
 ):
-    documentos, corpus_tokenizado = cargar_datos(ruta_corpus)
+    # USAMOS LAS VARIABLES GLOBALES EN LUGAR DE LEER EL DISCO
+    documentos = DOCUMENTOS_GLOBAL
+    corpus_tokenizado = CORPUS_TOKENIZADO_GLOBAL
+
+    if not documentos:
+        print("[ADVERTENCIA] El corpus global está vacío. Verifica la ruta o el archivo JSON.")
+        return {"probabilidad_plagio": 0.0, "error": "Corpus no cargado"}
 
     tokens_usuario_doc = aplanar_tokens(tokens_usuario)
 
@@ -478,18 +505,17 @@ def pipeline_plagio_hibrido(
         matriz_corpus_frag
     )
 
-    tokenizer, modelo_bert = cargar_modelo_bert()
-
+    # USAMOS EL MODELO BERT GLOBAL YA CARGADO EN RAM
     vectores_usuario = obtener_vectores_bert(
         textos_usuario,
-        tokenizer,
-        modelo_bert
+        TOKENIZER_GLOBAL,
+        MODELO_BERT_GLOBAL
     )
 
     vectores_corpus = obtener_vectores_bert(
         textos_corpus,
-        tokenizer,
-        modelo_bert
+        TOKENIZER_GLOBAL,
+        MODELO_BERT_GLOBAL
     )
 
     matriz_sim_bert = cosine_similarity(
@@ -643,7 +669,6 @@ def pipeline_plagio_hibrido(
 
     return salida
 
-
 if __name__ == "__main__":
     tokens = [
         "artificial", "intelligence", "algorithm", "classify", "data",
@@ -651,9 +676,9 @@ if __name__ == "__main__":
         "machine", "learning", "process", "large", "dataset"
     ]
 
+    # Al ejecutar esto directamente, cargará los datos de prueba
     resultado = pipeline_plagio_hibrido(
         tokens_usuario=tokens,
-        ruta_corpus="corpus/corpus_procesado.json",
         top_n_candidatos=100,
         top_n_preliminar=300,
         tamano_fragmento=120,

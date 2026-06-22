@@ -20,9 +20,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RUTA_MODELO_IA = os.path.join(BASE_DIR, "..", "corpus", "modelo_ia.npz")
 
 # Dimension del embedding comprimido de BERT
-# En vez de usar los 768 valores crudos (que capturan semantica de dominio
-# y causan overfitting al tema), comprimimos a 7 estadisticos agregados
-# que capturan las propiedades distribucionales del embedding.
 DIM_BERT_COMPRIMIDO = 7
 
 # Total de features: estilometricas + BERT comprimido
@@ -72,10 +69,6 @@ class RegresionLogisticaDesdeCero:
     def fit(self, X, y):
         """
         Entrena el modelo con gradient descent.
-
-        Parámetros:
-            X: numpy array (n_muestras, n_features)
-            y: numpy array (n_muestras,) con valores 0 o 1
         """
         # Normalizar features
         X_norm = self.normalizar_features(X, entrenamiento=True)
@@ -124,9 +117,6 @@ class RegresionLogisticaDesdeCero:
     def predict_proba(self, X):
         """
         Predice la probabilidad de ser IA (clase 1).
-
-        Retorna:
-            float o numpy array con probabilidades entre 0.0 y 1.0
         """
         X_norm = self.normalizar_features(X, entrenamiento=False)
         z = np.dot(X_norm, self.pesos) + self.bias
@@ -160,6 +150,21 @@ class RegresionLogisticaDesdeCero:
 
 
 # ============================================================
+# INICIALIZACIÓN GLOBAL DEL MODELO (Warm-up)
+# ============================================================
+# Esto se ejecuta una sola vez cuando Flask arranca e importa este archivo.
+modelo_ia_global = RegresionLogisticaDesdeCero()
+
+if not os.path.exists(RUTA_MODELO_IA):
+    print("[ADVERTENCIA] No se encontró el modelo entrenado de IA.")
+    print(f"  Ruta esperada: {RUTA_MODELO_IA}")
+    print("  Ejecuta primero: python -m backend.Entrenar_detector_ia")
+else:
+    modelo_ia_global.cargar(RUTA_MODELO_IA)
+    print("[OK] Modelo de IA cargado en memoria global exitosamente.")
+
+
+# ============================================================
 # 2. EXTRACCIÓN DE EMBEDDINGS BERT
 # ============================================================
 
@@ -190,15 +195,6 @@ def _cargar_bert():
 def extraer_embedding_bert(texto):
     """
     Extrae el embedding [CLS] de BERT para un texto dado.
-
-    BERT se usa SOLO como extractor de features (embeddings).
-    No se hace fine-tuning. Los pesos de BERT no se modifican.
-
-    Parámetros:
-        texto: str - Texto crudo
-
-    Retorna:
-        numpy array de 768 dimensiones
     """
     import torch
 
@@ -230,13 +226,6 @@ def extraer_embedding_bert(texto):
 def comprimir_embedding_bert(embedding_768):
     """
     Comprime el embedding BERT de 768 dimensiones a 7 estadisticos.
-
-    Usar los 768 valores crudos causa overfitting al dominio/tema del texto.
-    Los estadisticos agregados capturan las propiedades distribucionales
-    del embedding sin depender del tema especifico.
-
-    Retorna 7 features:
-        0: media, 1: std, 2: norma L2, 3: max, 4: min, 5: skewness, 6: kurtosis
     """
     media = np.mean(embedding_768)
     std = np.std(embedding_768)
@@ -264,15 +253,6 @@ def construir_vector_features(texto, tokens):
     Construye el vector completo de features combinando:
     - 15 features estilometricas
     - 7 features de BERT comprimidas (estadisticos del embedding)
-
-    Total: 22 features
-
-    Parametros:
-        texto: str - Texto crudo completo
-        tokens: list - Tokens lematizados
-
-    Retorna:
-        numpy array de 22 dimensiones
     """
     # Features estilometricas (15)
     feat_estilo = extraer_features_estilometricas(texto, tokens)
@@ -290,31 +270,18 @@ def construir_vector_features(texto, tokens):
 def pipeline_deteccion_ia(texto, tokens):
     """
     Pipeline completo de detección de IA.
-
-    Parámetros:
-        texto: str - Texto crudo extraído del PDF
-        tokens: list - Tokens lematizados del preprocesamiento
-
-    Retorna:
-        float - Porcentaje de probabilidad de ser IA (0.0 a 100.0)
     """
-    # Verificar que el modelo entrenado existe
-    if not os.path.exists(RUTA_MODELO_IA):
-        print("[ADVERTENCIA] No se encontró el modelo entrenado de IA.")
-        print(f"  Ruta esperada: {RUTA_MODELO_IA}")
-        print("  Ejecuta primero: python -m backend.Entrenar_detector_ia")
+    # Verificamos si el modelo cargó correctamente al inicio
+    if modelo_ia_global.pesos is None:
+        print("[ADVERTENCIA] No se pudo hacer la predicción porque el modelo no está cargado.")
         return 0.0
-
-    # Cargar modelo entrenado
-    modelo = RegresionLogisticaDesdeCero()
-    modelo.cargar(RUTA_MODELO_IA)
 
     # Construir vector de features
     vector = construir_vector_features(texto, tokens)
 
-    # Predecir probabilidad
+    # Predecir probabilidad usando el modelo global ya cargado
     vector_2d = vector.reshape(1, -1)
-    probabilidad = modelo.predict_proba(vector_2d)
+    probabilidad = modelo_ia_global.predict_proba(vector_2d)
 
     # Convertir a porcentaje
     if isinstance(probabilidad, np.ndarray):
